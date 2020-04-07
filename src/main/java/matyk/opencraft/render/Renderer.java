@@ -4,11 +4,13 @@ import com.google.common.primitives.Doubles;
 import com.google.common.primitives.Floats;
 import com.google.common.primitives.Ints;
 import matyk.opencraft.meshing.jvox.Vector3;
+import matyk.opencraft.utils.MatrixUtils;
 import matyk.opencraft.utils.StringLoader;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.eclipse.collections.impl.collector.Collectors2;
 import org.eclipse.collections.impl.factory.primitive.FloatLists;
+import org.joml.Matrix4f;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
 import org.lwjgl.opengl.GL11;
@@ -131,10 +133,11 @@ public class Renderer {
 
         glUseProgram(PID);
 
+        setUniform("project", MatrixUtils.projectionMatrix(70, 1, 0.1f, 100f));
+
         glDrawElements(GL_TRIANGLES, inds.size(), GL_UNSIGNED_INT, 0);
 
         glUseProgram(0);
-
 
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
@@ -143,5 +146,12 @@ public class Renderer {
         glDisableVertexAttribArray(1);
 
         glBindVertexArray(0);
+    }
+
+    public static void setUniform(String name, Matrix4f matrix) {
+        FloatBuffer matrixB = MemoryUtil.memAllocFloat(16);
+        matrix.get(matrixB);
+        glUniformMatrix4fv(glGetUniformLocation(PID, name), false, matrixB);
+        MemoryUtil.memFree(matrixB);
     }
 }
