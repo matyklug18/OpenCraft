@@ -13,6 +13,7 @@ import org.eclipse.collections.impl.factory.primitive.FloatLists;
 import org.joml.Matrix4f;
 import org.joml.Vector3f;
 import org.joml.Vector4f;
+import org.lwjgl.assimp.AIVector3D;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL20;
 import org.lwjgl.system.MemoryUtil;
@@ -23,6 +24,7 @@ import java.nio.IntBuffer;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.function.Function;
 import java.util.stream.Stream;
@@ -85,10 +87,10 @@ public class Renderer {
 
         vbo = glGenBuffers();
 
-        FloatBuffer vboBuffer = MemoryUtil.memAllocFloat(verts.size() * 3).put(Floats.toArray(Doubles.asList(verts.stream().flatMap((Function<Vector3f, Stream<Float>>) vector -> Stream.of(vector.x, vector.y, vector.z)).mapToDouble(Float::doubleValue).toArray()))).flip();
+
 
         glBindBuffer(GL_ARRAY_BUFFER, vbo);
-        glBufferData(GL_ARRAY_BUFFER, vboBuffer, GL_STATIC_DRAW);
+        glBufferData(GL_ARRAY_BUFFER, Floats.toArray(Doubles.asList(verts.stream().flatMap((Function<Vector3f, Stream<Float>>) vector -> Stream.of(vector.x, vector.y, vector.z)).mapToDouble(Float::doubleValue).toArray())), GL_STATIC_DRAW);
         glVertexAttribPointer(0, 3, GL_FLOAT, false, 0, 0);
         glBindBuffer(GL_ARRAY_BUFFER, 0);
 
@@ -103,19 +105,15 @@ public class Renderer {
 
         tbo = glGenBuffers();
 
-        FloatBuffer tboBuffer = MemoryUtil.memAllocFloat(tint.size() * 4).put(Floats.toArray(Doubles.asList(tint.stream().flatMap((Function<Vector4f, Stream<Float>>) vector -> Stream.of(vector.x, vector.y, vector.z, vector.w)).mapToDouble(Float::doubleValue).toArray()))).flip();
-
         glBindBuffer(GL_ARRAY_BUFFER, tbo);
-        glBufferData(GL_ARRAY_BUFFER, tboBuffer, GL_STATIC_DRAW);
+        glBufferData(GL_ARRAY_BUFFER, Floats.toArray(Doubles.asList(tint.stream().flatMap((Function<Vector4f, Stream<Float>>) vector -> Stream.of(vector.x, vector.y, vector.z, vector.w)).mapToDouble(Float::doubleValue).toArray())), GL_STATIC_DRAW);
         glVertexAttribPointer(1, 4, GL_FLOAT, false, 0, 0);
         glBindBuffer(GL_ARRAY_BUFFER, 0);
 
         ibo = glGenBuffers();
 
-        IntBuffer iboBuffer = MemoryUtil.memAllocInt(inds.size()).put(Ints.toArray(inds)).flip();
-
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, iboBuffer, GL_STATIC_DRAW);
+        glBufferData(GL_ELEMENT_ARRAY_BUFFER, Ints.toArray(inds), GL_STATIC_DRAW);
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
         glBindVertexArray(0);
@@ -134,6 +132,9 @@ public class Renderer {
         glUseProgram(PID);
 
         setUniform("project", MatrixUtils.projectionMatrix(70, 1, 0.1f, 100f));
+        setUniform("view", MatrixUtils.viewMatrix(new Vector3f(8,8, 32), new Vector3f(0,0,0)));
+        setUniform("model", MatrixUtils.transformationMatrix(new Vector3f(0,0,0), new Vector3f(0,0,0), new Vector3f(1,1,1)));
+
 
         glDrawElements(GL_TRIANGLES, inds.size(), GL_UNSIGNED_INT, 0);
 

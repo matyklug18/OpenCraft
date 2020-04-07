@@ -23,10 +23,10 @@ public class Mesher {
     static int index = 0;
 
     private static void meshCube(Voxel vox, int[] palette) {
-        List<Vector3f> vertPos = Arrays.asList(Cube.vertices);
-        List<Integer> indsList = Ints.asList(Cube.indices);
+        List<Vector3f> vertPos = new ArrayList<>(Arrays.asList(Cube.vertices));
+        List<Integer> indsList = new ArrayList<>(Ints.asList(Cube.indices));
 
-        vertPos = vertPos.stream().map(vector -> vector.add(vox.getPosition().getX(), vox.getPosition().getY(), vox.getPosition().getZ())).collect(Collectors.toList());
+        vertPos = vertPos.stream().map(vector -> vector.add(vox.getPosition().getX(), vox.getPosition().getY(), vox.getPosition().getZ(), new Vector3f())).collect(Collectors.toList());
 
         indsList = indsList.stream().map(integer -> integer+23*index).collect(Collectors.toList());
 
@@ -35,7 +35,6 @@ public class Mesher {
         inds.addAll(indsList);
 
         vertPos.forEach(v -> {
-
             int color = palette[vox.getColourIndex()+127];
 
             Color colorC = new Color(color, true);
