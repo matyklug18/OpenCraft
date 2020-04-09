@@ -1,6 +1,7 @@
 #version 460
-in vec3 passTint;
+in vec4 passTint;
+in float mul;
 out vec4 color;
 void main(){
-    color = vec4(passTint,1);
+    color = passTint/vec4(256)*vec4(vec3(mul), 1.);
 }

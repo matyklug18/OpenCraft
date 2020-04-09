@@ -28,7 +28,7 @@ public class Window {
         glfwWindowHint(GLFW_VISIBLE, GLFW_FALSE); 
         glfwWindowHint(GLFW_RESIZABLE, GLFW_TRUE);
         
-        winID = glfwCreateWindow(300, 300, "Hello World!", NULL, NULL);
+        winID = glfwCreateWindow(1000, 1000, "Hello World!", NULL, NULL);
         if (winID == NULL)
             throw new RuntimeException("Failed to create the GLFW window");
 
@@ -59,6 +59,9 @@ public class Window {
         glfwShowWindow(winID);
 
         GL.createCapabilities();
+
+        glEnable(GL_CULL_FACE);
+        glCullFace(GL_FRONT);
 
         glClearColor(1.0f, 0.0f, 0.0f, 0.0f);
     }

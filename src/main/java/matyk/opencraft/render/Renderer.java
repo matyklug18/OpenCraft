@@ -23,9 +23,7 @@ import java.nio.FloatBuffer;
 import java.nio.IntBuffer;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
+import java.util.*;
 import java.util.function.Function;
 import java.util.stream.Stream;
 
@@ -87,27 +85,23 @@ public class Renderer {
 
         vbo = glGenBuffers();
 
-
-
         glBindBuffer(GL_ARRAY_BUFFER, vbo);
         glBufferData(GL_ARRAY_BUFFER, Floats.toArray(Doubles.asList(verts.stream().flatMap((Function<Vector3f, Stream<Float>>) vector -> Stream.of(vector.x, vector.y, vector.z)).mapToDouble(Float::doubleValue).toArray())), GL_STATIC_DRAW);
         glVertexAttribPointer(0, 3, GL_FLOAT, false, 0, 0);
         glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-        nbo = glGenBuffers();
-
-        /*FloatBuffer nboBuffer = MemoryUtil.memAllocFloat(norms.size() * 3).put(Floats.toArray(Doubles.asList(norms.stream().flatMap((Function<Vector3f, Stream<Float>>) vector -> Stream.of(vector.x, vector.y, vector.z)).mapToDouble(Float::doubleValue).toArray()))).flip();
-
-        glBindBuffer(GL_ARRAY_BUFFER, nbo);
-        glBufferData(GL_ARRAY_BUFFER, nboBuffer, GL_STATIC_DRAW);
-        glVertexAttribPointer(1, 3, GL_FLOAT, false, 0, 0);
-        glBindBuffer(GL_ARRAY_BUFFER, 0);*/
 
         tbo = glGenBuffers();
 
         glBindBuffer(GL_ARRAY_BUFFER, tbo);
         glBufferData(GL_ARRAY_BUFFER, Floats.toArray(Doubles.asList(tint.stream().flatMap((Function<Vector4f, Stream<Float>>) vector -> Stream.of(vector.x, vector.y, vector.z, vector.w)).mapToDouble(Float::doubleValue).toArray())), GL_STATIC_DRAW);
         glVertexAttribPointer(1, 4, GL_FLOAT, false, 0, 0);
+        glBindBuffer(GL_ARRAY_BUFFER, 0);
+
+        nbo = glGenBuffers();
+
+        glBindBuffer(GL_ARRAY_BUFFER, nbo);
+        glBufferData(GL_ARRAY_BUFFER, Floats.toArray(Doubles.asList(norms.stream().flatMap((Function<Vector3f, Stream<Float>>) vector -> Stream.of(vector.x, vector.y, vector.z)).mapToDouble(Float::doubleValue).toArray())), GL_STATIC_DRAW);
+        glVertexAttribPointer(2, 3, GL_FLOAT, true, 0, 0);
         glBindBuffer(GL_ARRAY_BUFFER, 0);
 
         ibo = glGenBuffers();
@@ -119,12 +113,15 @@ public class Renderer {
         glBindVertexArray(0);
     }
 
+    static Vector3f pos = new Vector3f(8,8, 32);
+
     public static void render() {
+
         glBindVertexArray(vaoID);
 
         glEnableVertexAttribArray(0);
         glEnableVertexAttribArray(1);
-
+        glEnableVertexAttribArray(2);
 
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ibo);
 
@@ -132,9 +129,8 @@ public class Renderer {
         glUseProgram(PID);
 
         setUniform("project", MatrixUtils.projectionMatrix(70, 1, 0.1f, 100f));
-        setUniform("view", MatrixUtils.viewMatrix(new Vector3f(8,8, 32), new Vector3f(0,0,0)));
+        setUniform("view", MatrixUtils.viewMatrix(pos, new Vector3f(0,0,0)));
         setUniform("model", MatrixUtils.transformationMatrix(new Vector3f(0,0,0), new Vector3f(0,0,0), new Vector3f(1,1,1)));
-
 
         glDrawElements(GL_TRIANGLES, inds.size(), GL_UNSIGNED_INT, 0);
 
@@ -142,9 +138,10 @@ public class Renderer {
 
         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 
-
         glDisableVertexAttribArray(0);
         glDisableVertexAttribArray(1);
+        glDisableVertexAttribArray(2);
+
 
         glBindVertexArray(0);
     }
